@@ -11,9 +11,9 @@
       rel="stylesheet"
     />
     <script>
-      const pathSegments = window.location.pathname.split("/");
-      const lastPathSegment = pathSegments[pathSegments.length - 1];
-      const appearsToBeFileRequest = lastPathSegment.includes(".");
+      const lastPathSegment =
+        window.location.pathname.match(/[^/]+$/)?.[0] ?? "";
+      const appearsToBeFileRequest = /\.[a-z0-9]+$/i.test(lastPathSegment);
       const requiresTrailingSlash =
         window.location.pathname !== "/" &&
         !window.location.pathname.endsWith("/") &&
