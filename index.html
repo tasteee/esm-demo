@@ -10,6 +10,21 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;700;800&display=swap"
       rel="stylesheet"
     />
+    <script>
+      const pathSegments = window.location.pathname.split("/");
+      const lastPathSegment = pathSegments[pathSegments.length - 1];
+      const appearsToBeFileRequest = lastPathSegment.includes(".");
+      const requiresTrailingSlash =
+        window.location.pathname !== "/" &&
+        !window.location.pathname.endsWith("/") &&
+        !appearsToBeFileRequest;
+
+      if (requiresTrailingSlash) {
+        window.location.replace(
+          `${window.location.pathname}/${window.location.search}${window.location.hash}`
+        );
+      }
+    </script>
     <!-- 
       This is the entire "shared dependency" mechanism.
       When any module in this page imports '@clover/store',
