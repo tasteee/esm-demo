@@ -165,8 +165,8 @@
           <pre
             class="codeBlock"
           ><span class="cm">// host bootstrap — the entire loading sequence</span>
-<span class="kw">const</span> { mount: mountCounter } = <span class="kw">await</span> import(<span class="str">'/mfe-counter.js'</span>);
-<span class="kw">const</span> { mount: mountLogger  } = <span class="kw">await</span> import(<span class="str">'/mfe-logger.js'</span>);
+<span class="kw">const</span> { mount: mountCounter } = <span class="kw">await</span> import(<span class="str">'./mfe-counter.js'</span>);
+<span class="kw">const</span> { mount: mountLogger  } = <span class="kw">await</span> import(<span class="str">'./mfe-logger.js'</span>);
 
 mountCounter({ element: document.getElementById(<span class="str">'mfeCounterRoot'</span>) });
 mountLogger ({ element: document.getElementById(<span class="str">'mfeLoggerRoot'</span>) });</pre>
@@ -276,8 +276,8 @@ npx serve .</pre>
       const counterToggle = document.getElementById("counterToggle");
       const loggerToggle = document.getElementById("loggerToggle");
 
-      const { mount: mountCounter } = await import("/mfe-counter.js");
-      const { mount: mountLogger } = await import("/mfe-logger.js");
+      const { mount: mountCounter } = await import("./mfe-counter.js");
+      const { mount: mountLogger } = await import("./mfe-logger.js");
 
       let unmountCounter = mountCounter({ element: counterRoot });
       let unmountLogger = mountLogger({ element: loggerRoot });
