@@ -1,0 +1,477 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  font-size: 20px;
+  --color-background: #080808;
+  --color-surface: #111111;
+  --color-surface-raised: #1a1a1a;
+  --color-border: #2a2a2a;
+  --color-border-accent: #00ff88;
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #666;
+  --color-text-muted: #333;
+  --color-accent: #00ff88;
+  --color-accent-dim: rgba(0, 255, 136, 0.08);
+  --color-tag-background: #0d2b1e;
+  --color-tag-text: #00ff88;
+  --font-sans: "DM Sans", sans-serif;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  min-height: 100vh;
+  padding: 48px 24px;
+}
+
+.pageHeader {
+  max-width: 900px;
+  margin: 0 auto 40px;
+}
+
+.pageTitle {
+  font-family: var(--font-sans);
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.pageTitle span {
+  color: var(--color-accent);
+}
+
+.pageSubtitle {
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+.mfeWindows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.mfeWindow {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.mfeWindowBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--color-surface-raised);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.mfeWindowLabel {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.mfeWindowButton {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.1s,
+    color 0.1s;
+}
+
+.mfeWindowButton:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.mfeWindowBody {
+  flex: 1;
+  min-height: 300px;
+}
+
+/* unmounted state — shown when the MFE has been torn down */
+.mfeWindow.isUnmounted .mfeWindowBody {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.mfeWindow.isUnmounted .mfeWindowBody::after {
+  content: "unmounted";
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  letter-spacing: 0.05em;
+}
+
+.mfeWindow.isUnmounted .mfeWindowButton {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* MFE panel fills its window body */
+.mfeWindowBody .mfePanel {
+  height: 100%;
+  min-height: 300px;
+  border: none;
+}
+
+/* ── MFE panel styles (used by both MFEs) ── */
+
+.mfePanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  height: 100%;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mfePanelHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.mfePanelTag {
+  background: var(--color-tag-background);
+  color: var(--color-tag-text);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+}
+
+.mfePanelName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.mfePanelMeta {
+  padding: 8px 20px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-accent-dim);
+}
+
+.mfePanelMeta code {
+  font-family: var(--font-sans);
+  color: var(--color-accent);
+  font-size: 13px;
+}
+
+/* ── Counter MFE ── */
+
+.counterDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  flex: 1;
+  padding: 40px 20px;
+}
+
+.counterValue {
+  font-family: var(--font-sans);
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  min-width: 80px;
+  text-align: center;
+  line-height: 1;
+}
+
+.counterButton {
+  width: 48px;
+  height: 48px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  cursor: pointer;
+  transition:
+    border-color 0.1s,
+    color 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.counterButton:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* ── Logger MFE ── */
+
+.logList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logEntry {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  line-height: 1.5;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.logEntry:last-child {
+  border-bottom: none;
+}
+
+.logPlaceholder {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.calloutBody code {
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  padding: 1px 5px;
+  font-size: 0.75rem;
+}
+
+/* ── Demo note (below MFE grid) ── */
+
+.demoNote {
+  max-width: 900px;
+  margin: 16px auto 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  padding: 12px 20px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.demoNote code {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--color-accent);
+  font-size: 0.75rem;
+}
+
+/* ── Walkthrough ── */
+
+.walkthrough {
+  max-width: 900px;
+  margin: 80px auto 80px;
+}
+
+.walkthroughHeading {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: 48px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.walkthroughHeading span {
+  color: var(--color-accent);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 0 28px;
+  margin-bottom: 64px;
+}
+
+.stepNumber {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+  border: 1px solid var(--color-border-accent);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.stepTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 14px;
+}
+
+.stepBody {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.stepBody code {
+  font-family: "JetBrains Mono", monospace;
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  padding: 1px 5px;
+  font-size: 0.78rem;
+}
+
+.stepBody em {
+  color: var(--color-text-primary);
+  font-style: italic;
+}
+
+/* ── Code blocks ── */
+
+.codeBlock {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  padding: 20px 24px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.75;
+  overflow-x: auto;
+  white-space: pre;
+  margin-bottom: 20px;
+}
+
+/* syntax highlight spans */
+.codeBlock .cm {
+  color: #546e7a;
+  font-style: italic;
+} /* comment */
+.codeBlock .kw {
+  color: #c792ea;
+} /* keyword */
+.codeBlock .str {
+  color: #c3e88d;
+} /* string */
+.codeBlock .fn {
+  color: #82aaff;
+} /* function call */
+.codeBlock .tag {
+  color: #f07178;
+} /* html tag */
+.codeBlock .attr {
+  color: #ffcb6b;
+} /* html attribute */
+.codeBlock .tpl {
+  color: var(--color-accent);
+} /* template literal expr */
+
+/* ── MF vs ESM comparison table ── */
+
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.comparisonCol {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 20px 24px;
+}
+
+.comparisonColAccent {
+  border-color: var(--color-border-accent);
+}
+
+.comparisonLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: 14px;
+}
+
+.comparisonColAccent .comparisonLabel {
+  color: var(--color-accent);
+}
+
+.comparisonList {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comparisonList li {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.comparisonColAccent .comparisonList li {
+  color: var(--color-text-primary);
+}
+
+.comparisonList code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
+  padding: 1px 4px;
+}
+
+.comparisonColAccent .comparisonList code {
+  color: var(--color-accent);
+}
+
+@media (max-width: 600px) {
+  .mfeWindows,
+  .comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .step {
+    grid-template-columns: 1fr;
+  }
+
+  .stepNumber {
+    margin-bottom: 12px;
+  }
+}

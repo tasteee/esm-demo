@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ESM + Import Maps Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="./index.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- 
+      This is the entire "shared dependency" mechanism.
+      When any module in this page imports '@clover/store',
+      the browser resolves it to this exact URL.
+      Every importer gets the same cached module instance.
+      That IS the singleton guarantee.
+
+      In production this JSON would be generated from a
+      centralized manifest file at deploy time.
+    -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@clover/store": "./clover/store.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header class="pageHeader">
+      <h1 class="pageTitle">ESM <span>+</span> Import Maps</h1>
+      <p class="pageSubtitle">
+        Two independent micro-frontends sharing one store. No bundler. No
+        plugin. Just the browser.
+      </p>
+    </header>
+
+    <!-- Two MFEs — each wrapped in a host-controlled window -->
+    <div class="mfeWindows">
+      <div class="mfeWindow" id="counterWindow">
+        <div class="mfeWindowBar">
+          <span class="mfeWindowLabel"></span>
+          <button class="mfeWindowButton" id="counterToggle">Unmount</button>
+        </div>
+        <div class="mfeWindowBody" id="mfeCounterRoot"></div>
+      </div>
+
+      <div class="mfeWindow" id="loggerWindow">
+        <div class="mfeWindowBar">
+          <span class="mfeWindowLabel"></span>
+          <button class="mfeWindowButton" id="loggerToggle">Unmount</button>
+        </div>
+        <div class="mfeWindowBody" id="mfeLoggerRoot"></div>
+      </div>
+    </div>
+
+    <div class="demoNote">
+      Both panels show the same <code>store uid</code> — proof they received the
+      same module instance, not a copy.
+    </div>
+
+    <!-- ─── WALKTHROUGH ─────────────────────────────────────────── -->
+    <div class="walkthrough">
+      <h2 class="walkthroughHeading">How it <span>works</span></h2>
+
+      <!-- Step 01 -->
+      <div class="step">
+        <div class="stepNumber">01</div>
+        <div class="stepContent">
+          <h3 class="stepTitle">Modules are native</h3>
+          <p class="stepBody">
+            Since 2017, every major browser understands
+            <code>import</code> and <code>export</code>. Add
+            <code>type="module"</code> to a script tag and you are in the module
+            system — no transpiler, no bundler, nothing to install.
+          </p>
+          <pre
+            class="codeBlock"
+          ><span class="cm">&lt;!-- index.html — runs exactly like this in the browser --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"module"</span><span class="tag">&gt;</span>
+  <span class="kw">import</span> { greet } <span class="kw">from</span> <span class="str">'./greet.js'</span>;
+  greet(<span class="str">'world'</span>);
+<span class="tag">&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- greet.js --&gt;</span>
+<span class="kw">export const</span> greet = (name) =&gt; console.log(`hello, ${name}`);</pre>
+          <p class="stepBody">
+            Each file is its own scope. Nothing leaks to
+            <code>window</code>. Imports are resolved relative to the file
+            making them.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 02 -->
+      <div class="step">
+        <div class="stepNumber">02</div>
+        <div class="stepContent">
+          <h3 class="stepTitle">Bare specifiers &amp; the import map</h3>
+          <p class="stepBody">
+            <code>import '@clover/store'</code> uses a <em>bare specifier</em>
+            — not a relative path, not a URL. Without an import map the browser
+            rejects it. The import map is a single JSON block in
+            <code>&lt;head&gt;</code> that tells the browser how to resolve
+            them.
+          </p>
+          <pre
+            class="codeBlock"
+          ><span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"importmap"</span><span class="tag">&gt;</span>
+  {
+    <span class="str">"imports"</span>: {
+      <span class="str">"@clover/store"</span>: <span class="str">"./clover/store.js"</span>
+    }
+  }
+<span class="tag">&lt;/script&gt;</span></pre>
+          <p class="stepBody">
+            That is the entire shared-dependency configuration. One JSON object,
+            no build step required. In production you would generate this JSON
+            from a version manifest at deploy time — but the browser mechanism
+            is exactly the same.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 03 -->
+      <div class="step">
+        <div class="stepNumber">03</div>
+        <div class="stepContent">
+          <h3 class="stepTitle">Same URL = same instance</h3>
+          <p class="stepBody">
+            The browser caches every module by URL after the first fetch. When
+            <code>mfe-counter.js</code> and <code>mfe-logger.js</code> both
+            write <code>import '@clover/store'</code>, the import map resolves
+            both to <code>./clover/store.js</code>. The cache sees the same URL
+            and returns the same object — no second fetch, no copy.
+          </p>
+          <pre class="codeBlock"><span class="cm">// mfe-counter.js</span>
+<span class="kw">import</span> { store } <span class="kw">from</span> <span class="str">'@clover/store'</span>;  <span class="cm">// → ./clover/store.js  (fetched)</span>
+
+<span class="cm">// mfe-logger.js  (completely separate file, loaded separately)</span>
+<span class="kw">import</span> { store } <span class="kw">from</span> <span class="str">'@clover/store'</span>;  <span class="cm">// → ./clover/store.js  (cached ✓)</span></pre>
+          <p class="stepBody">
+            That is why both panels above show the same <code>store uid</code>.
+            The uid is generated once when <code>store.js</code> first executes.
+            Both MFEs received the same reference — not a copy. No webpack
+            shared scope. No <code>__webpack_require__</code>. The browser
+            module cache <em>is</em> the singleton mechanism.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 04 -->
+      <div class="step">
+        <div class="stepNumber">04</div>
+        <div class="stepContent">
+          <h3 class="stepTitle">Dynamic import loads MFEs lazily</h3>
+          <p class="stepBody">
+            Static <code>import</code> runs at parse time. Dynamic
+            <code>import()</code> is async — it returns a Promise and lets you
+            decide <em>when</em> to load a module. This is how a host shell
+            loads micro-frontends on demand.
+          </p>
+          <pre
+            class="codeBlock"
+          ><span class="cm">// host bootstrap — the entire loading sequence</span>
+<span class="kw">const</span> { mount: mountCounter } = <span class="kw">await</span> import(<span class="str">'/mfe-counter.js'</span>);
+<span class="kw">const</span> { mount: mountLogger  } = <span class="kw">await</span> import(<span class="str">'/mfe-logger.js'</span>);
+
+mountCounter({ element: document.getElementById(<span class="str">'mfeCounterRoot'</span>) });
+mountLogger ({ element: document.getElementById(<span class="str">'mfeLoggerRoot'</span>) });</pre>
+          <p class="stepBody">
+            Calling <code>import()</code> with the same URL a second time is
+            free — the cached module is returned immediately with no network
+            request and no re-execution of module-level code.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 05 -->
+      <div class="step">
+        <div class="stepNumber">05</div>
+        <div class="stepContent">
+          <h3 class="stepTitle">The MFE contract is just a function</h3>
+          <p class="stepBody">
+            Each MFE exports one thing: a <code>mount</code> function. It
+            receives a DOM element, renders into it, subscribes to shared state,
+            and returns an <code>unmount</code> cleanup. No framework adapter.
+            No registration call. No shared scope init.
+          </p>
+          <pre class="codeBlock"><span class="cm">// mfe-counter.js</span>
+<span class="kw">import</span> { store } <span class="kw">from</span> <span class="str">'@clover/store'</span>;
+
+<span class="kw">export const</span> mount = ({ element }) =&gt; {
+  element.innerHTML = `&lt;button id="dec"&gt;−&lt;/button&gt;
+    &lt;span id="val"&gt;${store.getCount()}&lt;/span&gt;
+    &lt;button id="inc"&gt;+&lt;/button&gt;`;
+
+  <span class="kw">const</span> unsub = store.subscribe((n) =&gt; {
+    element.querySelector(<span class="str">'#val'</span>).textContent = n;
+  });
+  element.querySelector(<span class="str">'#inc'</span>).addEventListener(<span class="str">'click'</span>, store.increment);
+  element.querySelector(<span class="str">'#dec'</span>).addEventListener(<span class="str">'click'</span>, store.decrement);
+
+  <span class="kw">return</span> () =&gt; { unsub(); element.innerHTML = <span class="str">''</span>; }; <span class="cm">// unmount</span>
+};</pre>
+
+          <div class="comparison">
+            <div class="comparisonCol">
+              <div class="comparisonLabel">Module Federation</div>
+              <ol class="comparisonList">
+                <li>Inject <code>&lt;script src="remoteEntry.js"&gt;</code></li>
+                <li>Wait for load event</li>
+                <li><code>__webpack_share_scopes__.default.init()</code></li>
+                <li><code>container.init(shareScope)</code></li>
+                <li><code>container.get('./Component')</code></li>
+                <li><code>factory()</code></li>
+                <li>Call <code>mount</code></li>
+              </ol>
+            </div>
+            <div class="comparisonCol comparisonColAccent">
+              <div class="comparisonLabel">ESM + Import Maps</div>
+              <ol class="comparisonList">
+                <li><code>await import(url)</code></li>
+                <li>Call <code>mount</code></li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 06 -->
+      <div class="step">
+        <div class="stepNumber">06</div>
+        <div class="stepContent">
+          <h3 class="stepTitle">No build tool — open the file, it runs</h3>
+          <p class="stepBody">
+            Every file in this demo is plain JavaScript. There is no
+            <code>package.json</code>, no <code>node_modules</code>, no config
+            file. Serve the directory over HTTP and open
+            <code>index.html</code>.
+          </p>
+          <pre
+            class="codeBlock"
+          ><span class="cm"># any static file server works</span>
+npx serve .</pre>
+          <p class="stepBody">
+            Import maps are supported in Chrome 89+, Firefox 108+, Safari 16.4+,
+            and Edge 89+. For older browsers, a small polyfill
+            (<code>es-module-shims</code>) drops in as a single script tag with
+            no changes to your modules.
+          </p>
+          <pre
+            class="codeBlock"
+          ><span class="cm">&lt;!-- polyfill for older browsers, if needed --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="str">"https://ga.jspm.io/npm:es-module-shims@1.10.0/dist/es-module-shims.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- import map and modules stay exactly the same --&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"importmap"</span><span class="tag">&gt;</span> ... <span class="tag">&lt;/script&gt;</span></pre>
+        </div>
+      </div>
+    </div>
+    <!-- /walkthrough -->
+
+    <!--
+      HOST BOOTSTRAP
+      The entire MFE loading sequence — 4 lines.
+      No remoteEntry, no shared scope init, no plugin.
+    -->
+    <script type="module">
+      const counterRoot = document.getElementById("mfeCounterRoot");
+      const loggerRoot = document.getElementById("mfeLoggerRoot");
+      const counterWindow = document.getElementById("counterWindow");
+      const loggerWindow = document.getElementById("loggerWindow");
+      const counterToggle = document.getElementById("counterToggle");
+      const loggerToggle = document.getElementById("loggerToggle");
+
+      const { mount: mountCounter } = await import("/mfe-counter.js");
+      const { mount: mountLogger } = await import("/mfe-logger.js");
+
+      let unmountCounter = mountCounter({ element: counterRoot });
+      let unmountLogger = mountLogger({ element: loggerRoot });
+
+      counterToggle.addEventListener("click", () => {
+        if (unmountCounter) {
+          unmountCounter();
+          unmountCounter = null;
+          counterToggle.textContent = "Mount";
+          counterWindow.classList.add("isUnmounted");
+        } else {
+          unmountCounter = mountCounter({ element: counterRoot });
+          counterToggle.textContent = "Unmount";
+          counterWindow.classList.remove("isUnmounted");
+        }
+      });
+
+      loggerToggle.addEventListener("click", () => {
+        if (unmountLogger) {
+          unmountLogger();
+          unmountLogger = null;
+          loggerToggle.textContent = "Mount";
+          loggerWindow.classList.add("isUnmounted");
+        } else {
+          unmountLogger = mountLogger({ element: loggerRoot });
+          loggerToggle.textContent = "Unmount";
+          loggerWindow.classList.remove("isUnmounted");
+        }
+      });
+    </script>
+  </body>
+</html>
